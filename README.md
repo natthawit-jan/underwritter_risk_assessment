@@ -29,4 +29,3 @@ This project provides an AI-assisted property risk analysis platform aimed at he
 
 - **Unused Imports**: Although the `folium` library is imported for potential map visualization, it is **not used** in the current backend implementation.
 
-- **Project Cleanup**: The project ZIP includes unnecessary MacOS system files (e.g., `.DS_Store`, `__MACOSX/`) which are harmless but should ideally be cleaned for production deployments.
