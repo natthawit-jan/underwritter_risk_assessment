@@ -1,0 +1,63 @@
+# Node.js (React frontend)
+node_modules/
+build/
+dist/
+.env
+.npmrc
+.cache/
+.vite/
+*.log
+*.tsbuildinfo
+
+# React specific
+*.env.local
+*.env.development.local
+*.env.test.local
+*.env.production.local
+
+# Mac system files
+.DS_Store
+
+# Python (Flask backend)
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pdb
+instance/
+.env
+.venv/
+env/
+venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Flask specific
+*.db
+*.sqlite3
+.mypy_cache/
+.pytest_cache/
+.flaskenv
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Coverage reports
+htmlcov/
+coverage.xml
+*.cover
+*.coverage
+.cache
+
+# Docker
+*.pid
+
+# Other
+logs/
+*.log
+temp/
+tmp/
