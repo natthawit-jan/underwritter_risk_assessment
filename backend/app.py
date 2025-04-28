@@ -4,14 +4,21 @@ import requests
 from geopy.geocoders import Nominatim
 import folium
 from langchain_community.llms import Ollama
+from langchain_openai import ChatOpenAI
 from langchain_community.tools import DuckDuckGoSearchRun
 from math import radians, sin, cos, sqrt, atan2
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file if it exists
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
-# --- CORSIG ---
+# --- Configuration ---
 OLLAMA_MODEL = "llama3.1:8b"
+OPENAI_MODEL = "gpt-3.5-turbo"
 FEMA_API_URL = "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries"
 
 # --- Helper: Haversine Distance ---
@@ -73,9 +80,8 @@ def search_disasters(address):
     results = search.run(query)
     return results
 
-# --- 4. Summarize Risk Using Ollama ---
-def summarize_risk(full_address, fema_disasters, search_results):
-    llm = Ollama(model=OLLAMA_MODEL)
+# --- 4. Summarize Risk Using LLM ---
+def summarize_risk(full_address, fema_disasters, search_results, model_type="ollama"):
     fema_text = "\n".join([f"- {d['disasterType']} at {d['distance_miles']} miles ({d['date']})" for d in fema_disasters])
 
     prompt = f"""
@@ -96,15 +102,22 @@ Tasks:
 
 Summary:
 """
-    response = llm.invoke(prompt)
+    
+    if model_type == "ollama":
+        llm = Ollama(model=OLLAMA_MODEL)
+        response = llm.invoke(prompt)
+    else:  # openai
+        llm = ChatOpenAI(model_name=OPENAI_MODEL)
+        response = llm.invoke(prompt).content  # Extract content from AIMessage
+    
     return response
 
 @app.route('/api/analyze', methods=['POST'])
 def analyze():
-    
     data = request.json
     address = data.get('address')
-    print(address)
+    model_type = data.get('model_type', 'ollama')  # Default to ollama if not specified
+    
     if not address:
         return jsonify({"error": "Address is required"}), 400
     
@@ -121,24 +134,24 @@ def analyze():
         search_results = search_disasters(full_address)
         
         # Summarize risk
-        risk_summary = summarize_risk(full_address, fema_disasters, search_results)
+        risk_summary = summarize_risk(full_address, fema_disasters, search_results, model_type)
         
         # Return results
         return jsonify({
             "coordinates": {"lat": lat, "lon": lon},
             "fullAddress": full_address,
             "femaDisasters": fema_disasters,
-            "riskSummary": risk_summary
+            "riskSummary": risk_summary,
+            "modelUsed": model_type
         })
     
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-
 @app.route('/api/hello')
 def hello():
     return {"Hello": "World"}
+
 if __name__ == "__main__":
     
     app.run(debug=True, port=5555, host="0.0.0.0")

@@ -3,6 +3,7 @@ import './App.css';
 
 function App() {
   const [address, setAddress] = useState('');
+  const [modelType, setModelType] = useState('ollama');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
@@ -18,7 +19,7 @@ function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ address }),
+        body: JSON.stringify({ address, model_type: modelType }),
       });
       
       if (!response.ok) {
@@ -72,6 +73,14 @@ function App() {
               placeholder="Enter a property address"
               required
             />
+            <select 
+              value={modelType}
+              onChange={(e) => setModelType(e.target.value)}
+              className="model-select"
+            >
+              <option value="ollama">Ollama (Local)</option>
+              <option value="openai">OpenAI</option>
+            </select>
             <button type="submit" disabled={loading}>
               {loading ? 'Processing...' : 'Analyze Risk'}
             </button>
@@ -127,7 +136,7 @@ function App() {
         )}
 
         <div className="footer">
-          <p>Powered by FEMA API, DuckDuckGo Search, and Ollama LLM</p>
+          <p>Powered by FEMA API, DuckDuckGo Search, and {modelType === 'ollama' ? 'Ollama LLM' : 'OpenAI'}</p>
         </div>
       </div>
     </div>
